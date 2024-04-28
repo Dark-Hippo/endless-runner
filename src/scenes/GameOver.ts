@@ -1,35 +1,57 @@
-import { Scene } from 'phaser';
-
-export class GameOver extends Scene
-{
-    camera: Phaser.Cameras.Scene2D.Camera;
-    background: Phaser.GameObjects.Image;
-    gameover_text : Phaser.GameObjects.Text;
-
-    constructor ()
-    {
-        super('GameOver');
+export class GameOver extends Phaser.Scene {
+    constructor() {
+        super({ key: "GameOver" });
     }
-
-    create ()
-    {
-        this.camera = this.cameras.main
-        this.camera.setBackgroundColor(0xff0000);
-
-        this.background = this.add.image(512, 384, 'background');
-        this.background.setAlpha(0.5);
-
-        this.gameover_text = this.add.text(512, 384, 'Game Over', {
-            fontFamily: 'Arial Black', fontSize: 64, color: '#ffffff',
-            stroke: '#000000', strokeThickness: 8,
-            align: 'center'
+    create() {
+        this.width = this.sys.game.config.width;
+        this.height = this.sys.game.config.height;
+        this.center_width = this.width / 2;
+        this.center_height = this.height / 2;
+        this.cameras.main.setBackgroundColor(0x87ceeb);
+        this.add
+            .bitmapText(
+                this.center_width,
+                50,
+                "arcade",
+                this.registry.get("score"),
+                25
+            )
+            .setOrigin(0.5);
+        this.add
+            .bitmapText(
+                this.center_width,
+                this.center_height,
+                "arcade",
+                "GAME OVER",
+                45
+            )
+            .setOrigin(0.5);
+        this.add
+            .bitmapText(
+                this.center_width,
+                250,
+                "arcade",
+                "Press SPACE or Click to restart!",
+                15
+            )
+            .setOrigin(0.5);
+        this.input.keyboard.on("keydown-SPACE", this.startGame, this);
+        this.input.on("pointerdown", (pointer) => this.startGame(), this);
+    }
+    showLine(text, y) {
+        let line = this.introLayer.add(
+            this.add
+                .bitmapText(this.center_width, y, "pixelFont", text, 25)
+                .setOrigin(0.5)
+                .setAlpha(0)
+        );
+        this.tweens.add({
+            targets: line,
+            duration: 2000,
+            alpha: 1,
         });
-        this.gameover_text.setOrigin(0.5);
-
-        this.input.once('pointerdown', () => {
-
-            this.scene.start('MainMenu');
-
-        });
+    }
+    startGame() {
+        this.scene.start("Game");
     }
 }
