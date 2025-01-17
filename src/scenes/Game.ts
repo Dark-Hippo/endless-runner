@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import Player from '../Player';
-import Generator from '../generator';
+import Generator, { Coin, Obstacle } from '../generator';
 
 export class Game extends Phaser.Scene
 {
@@ -9,8 +9,6 @@ export class Game extends Phaser.Scene
     msg_text : Phaser.GameObjects.Text;
     player: Player;
     score: number;
-    name: any;
-    number: any;
     width: number;
     height: number;
     center_width: number;
@@ -23,16 +21,12 @@ export class Game extends Phaser.Scene
     updateScoreEvent: Phaser.Time.TimerEvent;
     audios: any;
     theme: Phaser.Sound.NoAudioSound | Phaser.Sound.HTML5AudioSound | Phaser.Sound.WebAudioSound;
+    jumpTween: any;
 
     constructor ()
     {
         super('Game');
         this.score = 0;
-    }
-
-    init(data) {
-        this.name = data.name;
-        this.number = data.number;
     }
 
     /*
@@ -113,12 +107,12 @@ export class Game extends Phaser.Scene
         });
     }
 
-    hitObstacle(player, obstacle) {
+    hitObstacle(_player: Player, _obstacle: Obstacle) {
         this.updateScoreEvent.destroy();
         this.finishScene();
     }
 
-    hitCoin(player, coin) {
+    hitCoin(_player: Player, coin: Coin) {
         this.playAudio("coin");
         this.updateScore(1000);
         coin.destroy();
@@ -153,15 +147,15 @@ export class Game extends Phaser.Scene
     update() {
         if(Phaser.Input.Keyboard.JustDown(this.SPACE)) {
             this.jump();
-        } else if(this.player.body.blocked.down) {
+        } else if((this.player.body as Phaser.Physics.Arcade.Body).blocked.down) {
             this.jumpTween?.stop();
             this.player.rotation = 0;
         }
     }
 
     jump() {
-        if(!this.player.body.blocked.down) return;
-        this.player.body.setVelocityY(-300);
+        if(!(this.player.body as Phaser.Physics.Arcade.Body).blocked.down) return;
+        (this.player.body as Phaser.Physics.Arcade.Body).setVelocityY(-300);
 
         this.playAudio("jump");
         this.jumpTween = this.tweens.add({

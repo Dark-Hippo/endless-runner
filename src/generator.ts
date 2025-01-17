@@ -1,7 +1,8 @@
 export default class Generator {
-  constructor(scene) {
+  scene: Phaser.Scene;
+  constructor(scene: Phaser.Scene) {
     this.scene = scene;
-    this.scene.time.delayedCall(2000, () => this.init(), null, this);
+    this.scene.time.delayedCall(2000, () => this.init(), undefined, this);
     this.pinos = 0;
   }
 
@@ -20,7 +21,7 @@ This is done using the Phaser `time.delayedCall` function.
     this.scene.time.delayedCall(
       Phaser.Math.Between(2000, 3000),
       () => this.generateCloud(),
-      null,
+      undefined,
       this
     );
   }
@@ -36,7 +37,7 @@ This is done using the Phaser `time.delayedCall` function.
     this.scene.time.delayedCall(
       Phaser.Math.Between(1500, 2500),
       () => this.generateObstacle(),
-      null,
+      undefined,
       this
     );
   }
@@ -51,8 +52,8 @@ This is done using the Phaser `time.delayedCall` function.
     );
     this.scene.time.delayedCall(
       Phaser.Math.Between(500, 1500),
-      () => this.generateCoin(1),
-      null,
+      () => this.generateCoin(),
+      undefined,
       this
     );
   }
@@ -62,7 +63,7 @@ This is done using the Phaser `time.delayedCall` function.
 This is a game object that represents a cloud. It's a simple rectangle with a random size and position. We use a tween to move it from right to left, and then destroy it when it's out of the screen.
 */
 class Cloud extends Phaser.GameObjects.Rectangle {
-  constructor(scene, x, y) {
+  constructor(scene: Phaser.Scene, x: number = 0, y: number = 0) {
     const finalY = y || Phaser.Math.Between(0, 100);
     super(scene, x, finalY, 98, 32, 0xffffff);
     scene.add.existing(this);
@@ -87,12 +88,12 @@ class Cloud extends Phaser.GameObjects.Rectangle {
 /*
 This is a game object that represents an obstacle. It works exactly like the cloud, but it's a red rectangle that is part of the obstacles group that we created in the `game` scene. It can kill the player if it touches it.
 */
-class Obstacle extends Phaser.GameObjects.Rectangle {
-  constructor(scene, x, y) {
+export class Obstacle extends Phaser.GameObjects.Rectangle {
+  constructor(scene: Phaser.Scene, x: number, y: number) {
     super(scene, x, y, 32, 32, 0xff0000);
     scene.add.existing(this);
     scene.physics.add.existing(this);
-    this.body.setAllowGravity(false);
+    (this.body as Phaser.Physics.Arcade.Body).setAllowGravity(false);
     const alpha = 1 / Phaser.Math.Between(1, 3);
 
     this.init();
@@ -115,13 +116,12 @@ This is a game object that represents a coin. It's an animated sprite that is pa
 
 It can increase the player's score if it touches it.
 */
-class Coin extends Phaser.GameObjects.Sprite {
-  constructor(scene, x, y) {
+export class Coin extends Phaser.GameObjects.Sprite {
+  constructor(scene: Phaser.Scene, x: number, y: number) {
     super(scene, x, y, "coin");
     scene.add.existing(this);
     scene.physics.add.existing(this);
-    this.body.setAllowGravity(false);
-    const alpha = 1 / Phaser.Math.Between(1, 3);
+    (this.body as Phaser.Physics.Arcade.Body).setAllowGravity(false);
 
     this.init();
   }
@@ -136,7 +136,7 @@ class Coin extends Phaser.GameObjects.Sprite {
       },
     });
 
-    const coinAnimation = this.scene.anims.create({
+    this.scene.anims.create({
       key: "coin",
       frames: this.scene.anims.generateFrameNumbers("coin", {
         start: 0,
